@@ -89,11 +89,7 @@ export function findFlowFilesAsync(
       waiting++;
       // Get the file path for this file.
       const filePath = path.join(directory, fileName);
-      // Check whether file should be skipped
-      if (ig.ignores(filePath)) {
-        done();
-        return;
-      }
+
       // Get the stats for the file.
       fs.lstat(filePath, (error, stats) => {
         if (error) {
@@ -149,14 +145,9 @@ export function findFlowFilesAsync(
           }
           // If the buffer has the @flow pragma then add the file path to our
           // final file paths array.
-          if (buffer.includes("@flow")) {
-            filePaths.push({ filePath, fileType: FlowFileType.FLOW });
-          } else if (buffer.includes("@noflow")) {
-            filePaths.push({ filePath, fileType: FlowFileType.NO_FLOW });
-            reporter.foundNoFlowAnnotation(filePath);
-          } else {
-            reporter.foundNonFlowfile(filePath);
-          }
+
+          filePaths.push({ filePath, fileType: FlowFileType.FLOW });
+
           // Close the file.
           fs.close(file, (error) => {
             if (error) {
