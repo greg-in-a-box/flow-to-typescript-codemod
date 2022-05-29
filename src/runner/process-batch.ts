@@ -53,6 +53,8 @@ export async function processBatchAsync(
           parser: recastFlowParser,
         });
         const isTestFile = filePath.endsWith(".test.js");
+        const isStoryFile = filePath.endsWith(".stories.js");
+
         if (hasDeclaration(file)) {
           reporter.foundDeclarationFile(filePath);
           return;
@@ -133,9 +135,17 @@ export async function processBatchAsync(
               }
             }
           }
+        } else if(!isStoryFile) {
+          // Create a .flow copy of the js file when it's not a test file
+          const jsFlowFilePath = targetFilePath.replace(
+              /\.js?$/,
+              ".js.flow"
+          );
+          await fs.outputFile(jsFlowFilePath, newFileText);
         }
 
         await fs.outputFile(tsFilePath, newFileText);
+
       } catch (error) {
         // Report errors, but don’t crash the worker...
         reporter.error(filePath, error);
